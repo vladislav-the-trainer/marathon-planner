@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marathon Training Planner</title>
+    <link rel="stylesheet" href="static/css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body>
+    <div class="container" x-data="plannerApp()">
+        <header>
+            <h1>Marathon Training Planner</h1>
+            <p class="subtitle">Get your personalized marathon training plan</p>
+        </header>
+
+        <!-- Questionnaire Form -->
+        <div x-show="!plan" class="questionnaire">
+            <form @submit.prevent="generatePlan">
+                <div class="form-group">
+                    <label for="fitness_level">Fitness Level</label>
+                    <select id="fitness_level" x-model="input.fitness_level" required>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="marathon_date">Marathon Date</label>
+                    <input
+                        type="date"
+                        id="marathon_date"
+                        x-model="input.marathon_date"
+                        :min="minDate"
+                        required
+                    >
+                    <small x-show="weeksUntilRace > 0">
+                        <span x-text="weeksUntilRace + ' weeks from now'"></span>
+                        <span x-show="weeksUntilRace < 20" class="warning-text"> ⚠ Less than 20 weeks - </span>
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="target_finish_min">Target Finish Time (minutes)</label>
+                    <input
+                        type="number"
+                        id="target_finish_min"
+                        x-model.number="input.target_finish_min"
+                        min="120"
+                        max="480"
+                        required
+                    >
+                    <small x-text="formatTime(input.target_finish_min)"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="training_days_per_week">Training Days Per Week</label>
+                    <select id="training_days_per_week" x-model.number="input.training_days_per_week" required>
+                        <option value="">Select days</option>
+                        <option value="3">3 days</option>
+                        <option value="4">4 days</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" :disabled="loading">
+                        <span x-show="!loading">Generate My Plan</span>
+                        <span x-show="loading">Generating...</span>
+                    </button>
+                </div>
+
+                <div x-show="error" class="error" x-text="error"></div>
+            </form>
+        </div>
+
+        <!-- Training Plan Display -->
+        <div x-show="plan" class="plan-view">
+            <div class="plan-header">
+                <h2>Your Training Plan</h2>
+                <button @click="reset" class="btn-secondary">Create New Plan</button>
+            </div>
+
+            <div x-show="weeksUntilRace > 0 && weeksUntilRace < 20" class="warning-banner">
+                <strong>⚠ Warning:</strong> You have less than 20 weeks until race day. Your plan has been compressed to fit your timeline. Keep in mind that a longer preparation period leads to better results.
+            </div>
+
+            <div class="plan-summary">
+                <div class="summary-item">
+                    <span class="label">Marathon Date:</span>
+                    <span class="value" x-text="formatMarathonDate(input.marathon_date)"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Total Weeks:</span>
+                    <span class="value" x-text="plan?.TotalWeeks"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Fitness Level:</span>
+                    <span class="value" x-text="input.fitness_level"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Training Days:</span>
+                    <span class="value" x-text="input.training_days_per_week + ' days/week'"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Target Time:</span>
+                    <span class="value" x-text="formatTime(input.target_finish_min)"></span>
+                </div>
+            </div>
+
+            <div class="weeks-container">
+                <template x-for="week in plan?.Weeks" :key="week.WeekNumber">
+                    <div class="week-card">
+                        <div class="week-header">
+                            <h3>Week <span x-text="week.WeekNumber"></span></h3>
+                            <span class="week-total" x-text="weekTotal(week) + ' km'"></span>
+                        </div>
+                        <div class="sessions">
+                            <template x-for="session in getFullWeek(week)" :key="session.Day + session._dayIndex">
+                                <div class="session-card" :class="['session-' + session.Type, session.Description && (session.Description.includes('MARATHON RACE DAY') || session.Description.includes('🏁')) ? 'race-day' : '']">
+                                    <div class="session-day" x-text="session.Day + ', ' + getSessionDate(week.WeekNumber, session._dayIndex)"></div>
+                                    <div x-show="session.Type !== 'post-race'" class="session-type" x-text="formatSessionType(session.Type)"></div>
+                                    <div x-show="session.Type !== 'post-race'" class="session-description" x-text="session.Description"></div>
+                                    <div x-show="session.Type !== 'post-race'" class="session-distance" x-text="session.DistanceKm ? session.DistanceKm + ' km' : ''"></div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/js/app.js"></script>
+</body>
+</html>

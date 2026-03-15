@@ -27,6 +27,18 @@ go.work.sum
 # env file
 .env
 
+# Database files
+*.db
+*.db-journal
+data/
+
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db

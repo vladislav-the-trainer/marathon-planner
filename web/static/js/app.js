@@ -1,7 +1,7 @@
 function plannerApp() {
     return {
         input: {
-            fitness_level: 'Beginner',
+            fitness_level: 'intermediate',
             marathon_date: '',
             target_finish_min: 240,
             training_days_per_week: 4

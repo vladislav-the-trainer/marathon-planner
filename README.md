@@ -20,7 +20,7 @@ Built as a personal tool for a triathlete who actually uses it.
 **Backend:**
 - Go 1.26.1
 - Chi router v5
-- SQLite (modernc.org/sqlite - pure Go, no CGo)
+- SQLite (modernc.org/sqlite - pure Go, no CGo) - TBD
 - CORS enabled
 
 **Frontend:**

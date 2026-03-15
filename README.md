@@ -35,7 +35,7 @@ Built as a personal tool for a triathlete who actually uses it.
 
 - Go 1.26.1 or higher
 
-### Installation
+### How to test locally
 
 1. Clone the repository:
 ```bash
@@ -158,11 +158,6 @@ The base plan follows a structured 20-week progression:
 - **Weeks 17-19**: Taper period
 - **Week 20**: Race week
 
-Plans are scaled based on fitness level:
-- **Beginner**: 0.8x base distances
-- **Intermediate**: 1.0x base distances
-- **Advanced**: 1.15x base distances
-
 ## Roadmap
 
 - [ ] PDF export functionality
@@ -183,8 +178,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Author
 
 Built by [Vladislav the Trainer](https://github.com/vladislav-the-trainer)
-
-## Acknowledgments
-
-- Base training plan derived from "Get Prepared for Marathon During 20 Weeks" methodology
-- Built for runners, by a runner

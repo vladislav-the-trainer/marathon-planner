@@ -117,12 +117,13 @@ function plannerApp() {
 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    throw new Error(errorText || 'Failed to generate plan');
+                    this.error = errorText || 'Failed to generate plan';
+                    return;
                 }
 
                 this.plan = await response.json();
             } catch (err) {
-                this.error = err.message;
+                this.error = err.message || 'An unexpected error occurred';
                 console.error('Error generating plan:', err);
             } finally {
                 this.loading = false;

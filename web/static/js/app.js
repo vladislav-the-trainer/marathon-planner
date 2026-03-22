@@ -58,7 +58,9 @@ function plannerApp() {
 
         formatMarathonDate(dateStr) {
             if (!dateStr) return '';
-            const date = new Date(dateStr);
+            // Use plan.race_date if available, otherwise use input
+            const raceDateStr = this.plan?.race_date || dateStr;
+            const date = new Date(raceDateStr);
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             const day = date.getDate();
             const month = months[date.getMonth()];
@@ -78,145 +80,18 @@ function plannerApp() {
         },
 
         weekTotal(week) {
-            if (!week.Sessions) return 0;
-            return week.Sessions.reduce((sum, session) => {
-                return sum + (session.DistanceKm || 0);
+            if (!week.sessions) return 0;
+            return week.sessions.reduce((sum, session) => {
+                return sum + (session.distance_km || 0);
             }, 0).toFixed(1);
         },
 
-        getFullWeek(week) {
-            const allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-            const sessionMap = {};
-            const raceDate = new Date(this.input.marathon_date + 'T12:00:00');
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            // Map existing sessions by day
-            if (week.Sessions) {
-                week.Sessions.forEach(session => {
-                    sessionMap[session.Day] = session;
-                });
-            }
-
-            // Create full week with rest days
-            const fullWeek = allDays.map((day, index) => {
-                const sessionDate = this.getSessionDateObject(week.WeekNumber, index);
-
-                // Normalize dates to YYYY-MM-DD format for comparison
-                const sessionDateStr = sessionDate.getFullYear() + '-' +
-                    String(sessionDate.getMonth() + 1).padStart(2, '0') + '-' +
-                    String(sessionDate.getDate()).padStart(2, '0');
-                const raceDateStr = raceDate.getFullYear() + '-' +
-                    String(raceDate.getMonth() + 1).padStart(2, '0') + '-' +
-                    String(raceDate.getDate()).padStart(2, '0');
-
-                // If this is the race day, replace with marathon event
-                if (sessionDateStr === raceDateStr) {
-                    return {
-                        Day: day,
-                        Type: 'long_run',
-                        Description: '🏁 MARATHON RACE DAY 🏁',
-                        DistanceKm: 42.2,
-                        _dayIndex: index
-                    };
-                }
-
-                // Ensure at least 1 rest day before marathon
-                const dayBeforeRace = new Date(raceDate);
-                dayBeforeRace.setDate(raceDate.getDate() - 1);
-                const dayBeforeRaceStr = dayBeforeRace.getFullYear() + '-' +
-                    String(dayBeforeRace.getMonth() + 1).padStart(2, '0') + '-' +
-                    String(dayBeforeRace.getDate()).padStart(2, '0');
-
-                if (sessionDateStr === dayBeforeRaceStr) {
-                    return {
-                        Day: day,
-                        Type: 'rest',
-                        Description: 'Rest day before marathon',
-                        DistanceKm: 0,
-                        _dayIndex: index
-                    };
-                }
-
-                if (sessionMap[day]) {
-                    return {
-                        ...sessionMap[day],
-                        _dayIndex: index
-                    };
-                } else {
-                    return {
-                        Day: day,
-                        Type: 'rest',
-                        Description: 'Rest day',
-                        DistanceKm: 0,
-                        _dayIndex: index
-                    };
-                }
-            });
-
-            // Filter out sessions in the past and today, but mark sessions after marathon as post-race
-            return fullWeek.map((session) => {
-                const sessionDate = this.getSessionDateObject(week.WeekNumber, session._dayIndex);
-                const sessionDateStr = sessionDate.getFullYear() + '-' +
-                    String(sessionDate.getMonth() + 1).padStart(2, '0') + '-' +
-                    String(sessionDate.getDate()).padStart(2, '0');
-                const raceDateStr = raceDate.getFullYear() + '-' +
-                    String(raceDate.getMonth() + 1).padStart(2, '0') + '-' +
-                    String(raceDate.getDate()).padStart(2, '0');
-
-                // Mark sessions after the marathon as post-race (empty tiles)
-                if (sessionDateStr > raceDateStr) {
-                    return {
-                        ...session,
-                        Type: 'post-race',
-                        Description: '',
-                        DistanceKm: 0
-                    };
-                }
-
-                return session;
-            }).filter((session) => {
-                const sessionDate = this.getSessionDateObject(week.WeekNumber, session._dayIndex);
-                return sessionDate > today;
-            });
-        },
-
-        getSessionDateObject(weekNumber, dayIndex) {
-            if (!this.input.marathon_date) return new Date();
-
-            const raceDate = new Date(this.input.marathon_date + 'T00:00:00');
-            const totalWeeks = this.plan?.TotalWeeks || 20;
-
-            // Get the day of week for race date (0=Sunday, 1=Monday, etc.)
-            const raceDayOfWeek = raceDate.getDay();
-
-            // Calculate the Monday of the race week
-            const raceWeekMonday = new Date(raceDate);
-            const daysFromMonday = raceDayOfWeek === 0 ? 6 : raceDayOfWeek - 1; // Sunday is 6 days from Monday
-            raceWeekMonday.setDate(raceDate.getDate() - daysFromMonday);
-
-            // Calculate weeks back from race week
-            const weeksBack = totalWeeks - weekNumber;
-
-            // Calculate the Monday of this week
-            const thisWeekMonday = new Date(raceWeekMonday);
-            thisWeekMonday.setDate(raceWeekMonday.getDate() - (weeksBack * 7));
-
-            // Add the day index to get the actual session date
-            const sessionDate = new Date(thisWeekMonday);
-            sessionDate.setDate(thisWeekMonday.getDate() + dayIndex);
-            sessionDate.setHours(0, 0, 0, 0);
-
-            return sessionDate;
-        },
-
-        getSessionDate(weekNumber, dayIndex) {
-            const sessionDate = this.getSessionDateObject(weekNumber, dayIndex);
-
-            // Format as "7 Apr"
+        formatSessionDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const day = sessionDate.getDate();
-            const month = months[sessionDate.getMonth()];
+            const day = date.getDate();
+            const month = months[date.getMonth()];
             return `${day} ${month}`;
         },
 
@@ -227,7 +102,7 @@ function plannerApp() {
             try {
                 const requestData = {
                     fitness_level: this.input.fitness_level,
-                    weeks_until_race: this.weeksUntilRace,
+                    race_date: this.input.marathon_date,
                     target_finish_min: this.input.target_finish_min,
                     training_days_per_week: this.input.training_days_per_week
                 };

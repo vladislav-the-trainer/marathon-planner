@@ -94,7 +94,7 @@
                 </div>
                 <div class="summary-item">
                     <span class="label">Total Weeks:</span>
-                    <span class="value" x-text="plan?.TotalWeeks"></span>
+                    <span class="value" x-text="plan?.total_weeks"></span>
                 </div>
                 <div class="summary-item">
                     <span class="label">Fitness Level:</span>
@@ -111,19 +111,19 @@
             </div>
 
             <div class="weeks-container">
-                <template x-for="week in plan?.Weeks" :key="week.WeekNumber">
+                <template x-for="week in plan?.weeks" :key="week.week_number">
                     <div class="week-card">
                         <div class="week-header">
-                            <h3>Week <span x-text="week.WeekNumber"></span></h3>
+                            <h3>Week <span x-text="week.week_number"></span></h3>
                             <span class="week-total" x-text="weekTotal(week) + ' km'"></span>
                         </div>
                         <div class="sessions">
-                            <template x-for="session in getFullWeek(week)" :key="session.Day + session._dayIndex">
-                                <div class="session-card" :class="['session-' + session.Type, session.Description && (session.Description.includes('MARATHON RACE DAY') || session.Description.includes('🏁')) ? 'race-day' : '']">
-                                    <div class="session-day" x-text="session.Day + ', ' + getSessionDate(week.WeekNumber, session._dayIndex)"></div>
-                                    <div x-show="session.Type !== 'post-race'" class="session-type" x-text="formatSessionType(session.Type)"></div>
-                                    <div x-show="session.Type !== 'post-race'" class="session-description" x-text="session.Description"></div>
-                                    <div x-show="session.Type !== 'post-race'" class="session-distance" x-text="session.DistanceKm ? session.DistanceKm + ' km' : ''"></div>
+                            <template x-for="session in week.sessions" :key="session.date">
+                                <div class="session-card" :class="['session-' + session.type, session.description && (session.description.includes('MARATHON RACE DAY') || session.description.includes('🏁')) ? 'race-day' : '']">
+                                    <div class="session-day" x-text="session.day_name + ', ' + formatSessionDate(session.date)"></div>
+                                    <div x-show="session.type !== 'post-race'" class="session-type" x-text="formatSessionType(session.type)"></div>
+                                    <div x-show="session.type !== 'post-race'" class="session-description" x-text="session.description"></div>
+                                    <div x-show="session.type !== 'post-race'" class="session-distance" x-text="session.distance_km ? session.distance_km + ' km' : ''"></div>
                                 </div>
                             </template>
                         </div>

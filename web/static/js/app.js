@@ -74,6 +74,7 @@ function plannerApp() {
                 'tempo': 'Tempo',
                 'long_run': 'Long Run',
                 'gym': 'Gym',
+                'jogging': 'Jogging',
                 'rest': 'Rest'
             };
             return types[type] || type;

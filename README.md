@@ -14,7 +14,6 @@ Built as a personal tool for a triathlete who actually uses it.
 - **Progress Tracking**: Color-coded session types, weekly distance totals
 - **Responsive Design**: Works on desktop and mobile
 - **Filter Past Sessions**: Only shows upcoming training sessions
-- **Scroll to Top**: Floating button for easy navigation in long training plans
 
 ## Tech Stack
 

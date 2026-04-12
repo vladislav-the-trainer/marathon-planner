@@ -8,6 +8,7 @@ const (
 	SessionTempo    SessionType = "tempo"
 	SessionLongRun  SessionType = "long_run"
 	SessionGym      SessionType = "gym"
+	SessionJogging  SessionType = "jogging"
 	SessionRest     SessionType = "rest"
 )
 

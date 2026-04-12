@@ -134,6 +134,68 @@ function plannerApp() {
         reset() {
             this.plan = null;
             this.error = '';
+        },
+
+        downloadPDF() {
+            // Set the document title for the PDF filename
+            const raceDate = this.formatMarathonDate(this.input.marathon_date).replace(/ /g, '-');
+            const originalTitle = document.title;
+            document.title = `Marathon-Training-Plan-${raceDate}`;
+            
+            // Trigger print dialog
+            window.print();
+            
+            // Restore original title
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 100);
+        },
+
+        get paceTable() {
+            if (!this.input.target_finish_min) return [];
+
+            const marathonDistance = 42.195;
+            const marathonTimeMin = this.input.target_finish_min;
+
+            // Distances to calculate paces for
+            const distances = [
+                { km: 42.195, label: 'Marathon (42.2 km)' },
+                { km: 21.0975, label: 'Half Marathon (21.1 km)' },
+                { km: 10, label: '10K' },
+                { km: 5, label: '5K' },
+                { km: 1, label: '1K' }
+            ];
+
+            // Riegel formula: T2 = T1 × (D2/D1)^1.06
+            const fatigueFactor = 1.06;
+
+            return distances.map(d => {
+                // Calculate time using Riegel formula
+                const timeMin = marathonTimeMin * Math.pow(d.km / marathonDistance, fatigueFactor);
+
+                // Calculate pace (min/km)
+                const paceMin = timeMin / d.km;
+                const paceMinInt = Math.floor(paceMin);
+                const paceSec = Math.round((paceMin - paceMinInt) * 60);
+                const paceStr = `${paceMinInt}:${paceSec.toString().padStart(2, '0')}`;
+
+                // Calculate time string
+                const hours = Math.floor(timeMin / 60);
+                const mins = Math.floor(timeMin % 60);
+                const secs = Math.round((timeMin - Math.floor(timeMin)) * 60);
+                let timeStr = '';
+                if (hours > 0) {
+                    timeStr = `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                } else {
+                    timeStr = `${mins}:${secs.toString().padStart(2, '0')}`;
+                }
+
+                return {
+                    distance: d.label,
+                    pace: `${paceStr} /km`,
+                    time: timeStr
+                };
+            });
         }
     };
 }

@@ -184,15 +184,85 @@ button[type="submit"]:disabled {
     color: var(--gray-900);
 }
 
+.plan-header-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-download {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: var(--success);
+    color: white;
+    transition: all 0.2s;
+}
+
+.btn-download:hover {
+    background: #059669;
+}
+
 .plan-summary {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.pace-table-container {
     margin-bottom: 2rem;
     padding: 1.5rem;
     background: white;
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.pace-table-container h3 {
+    margin-bottom: 0.25rem;
+    color: var(--gray-900);
+}
+
+.pace-table-subtitle {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-bottom: 1rem;
+}
+
+.pace-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.pace-table th,
+.pace-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.pace-table th {
+    font-weight: 600;
+    color: var(--gray-700);
+    background: var(--gray-50);
+}
+
+.pace-table td {
+    color: var(--gray-900);
+}
+
+.pace-table tr:last-child td {
+    border-bottom: none;
+}
+
+.pace-table tr:hover td {
+    background: var(--gray-50);
 }
 
 .summary-item {
@@ -420,5 +490,233 @@ button[type="submit"]:disabled {
     .scroll-to-top svg {
         width: 20px;
         height: 20px;
+    }
+}
+
+/* Print Styles for PDF */
+@media print {
+    @page {
+        size: A4 landscape;
+        margin: 10mm;
+    }
+
+    body {
+        background: white;
+        font-size: 9pt;
+        line-height: 1.3;
+    }
+
+    .container {
+        max-width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Hide unnecessary elements */
+    .questionnaire,
+    .btn-secondary,
+    .btn-download,
+    .scroll-to-top,
+    .plan-header-actions,
+    header p.subtitle {
+        display: none !important;
+    }
+
+    header {
+        margin-bottom: 1rem;
+        text-align: left;
+    }
+
+    header h1 {
+        font-size: 16pt;
+        margin-bottom: 0.25rem;
+    }
+
+    .plan-view {
+        animation: none;
+    }
+
+    .plan-header {
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 0.75rem;
+    }
+
+    .plan-header h2 {
+        font-size: 14pt;
+    }
+
+    .plan-summary {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0.5rem;
+        padding: 0.5rem;
+        margin-bottom: 0.75rem;
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+
+    .summary-item .label {
+        font-size: 7pt;
+    }
+
+    .summary-item .value {
+        font-size: 9pt;
+    }
+
+    .pace-table-container {
+        margin-bottom: 0.75rem;
+        padding: 0.5rem;
+        box-shadow: none;
+        border: 1px solid #ddd;
+        page-break-inside: avoid;
+    }
+
+    .pace-table-container h3 {
+        font-size: 10pt;
+        margin-bottom: 0.25rem;
+    }
+
+    .pace-table-subtitle {
+        display: none;
+    }
+
+    .pace-table th,
+    .pace-table td {
+        padding: 0.25rem 0.4rem;
+        font-size: 8pt;
+    }
+
+    .weeks-container {
+        gap: 0.75rem;
+    }
+
+    .week-card {
+        padding: 0.5rem;
+        box-shadow: none;
+        border: 1px solid #333;
+        page-break-inside: avoid;
+        margin-bottom: 0.5rem;
+    }
+
+    .week-header {
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #333;
+    }
+
+    .week-header h3 {
+        font-size: 11pt;
+    }
+
+    .week-total {
+        font-size: 10pt;
+    }
+
+    /* Calendar grid layout - 7 columns for 7 days */
+    .sessions {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+        width: 100%;
+    }
+
+    .session-card {
+        padding: 4px;
+        border-left: 3px solid;
+        border-radius: 0;
+        min-height: 60px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .session-day {
+        font-size: 7pt;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .session-type {
+        font-size: 8pt;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .session-description {
+        font-size: 6pt;
+        color: #4b5563;
+        margin-bottom: 2px;
+        line-height: 1.2;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .session-distance {
+        font-size: 8pt;
+        font-weight: 600;
+        color: #2563eb;
+        margin-top: auto;
+    }
+
+    /* Session type colors for print */
+    .session-card.session-interval {
+        background: #fef3c7;
+        border-left-color: #f59e0b;
+    }
+
+    .session-card.session-tempo {
+        background: #ede9fe;
+        border-left-color: #8b5cf6;
+    }
+
+    .session-card.session-long_run {
+        background: #d1fae5;
+        border-left-color: #10b981;
+    }
+
+    .session-card.session-gym {
+        background: #e0e7ff;
+        border-left-color: #6366f1;
+    }
+
+    .session-card.session-jogging {
+        background: #fce7f3;
+        border-left-color: #db2777;
+    }
+
+    .session-card.session-rest {
+        background: #f3f4f6;
+        border-left-color: #9ca3af;
+        opacity: 0.7;
+    }
+
+    .session-card.session-rest .session-type,
+    .session-card.session-rest .session-description,
+    .session-card.session-rest .session-distance {
+        color: #9ca3af;
+    }
+
+    .session-card.race-day {
+        background: #1e40af;
+        border: 2px solid #dc2626;
+        border-left-width: 3px;
+        color: white;
+    }
+
+    .session-card.race-day .session-day,
+    .session-card.race-day .session-type,
+    .session-card.race-day .session-description,
+    .session-card.race-day .session-distance {
+        color: white;
+    }
+
+    .session-card.session-post-race {
+        background: #f9fafb;
+        border-left-color: #e5e7eb;
+        opacity: 0.5;
     }
 }

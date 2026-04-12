@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marathon Training Planner</title>
-    <link rel="stylesheet" href="static/css/styles.css?v=8">
+    <link rel="stylesheet" href="static/css/styles.css?v=11">
     <!-- flatpickr date picker -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" crossorigin="anonymous"></script>
@@ -84,7 +84,10 @@
         <div x-show="plan" class="plan-view">
             <div class="plan-header">
                 <h2>Your Training Plan</h2>
-                <button @click="reset" class="btn-secondary">Create New Plan</button>
+                <div class="plan-header-actions">
+                    <button @click="downloadPDF" class="btn-download">Download PDF</button>
+                    <button @click="reset" class="btn-secondary">Create New Plan</button>
+                </div>
             </div>
 
             <div x-show="weeksUntilRace > 0 && weeksUntilRace < 20" class="warning-banner">
@@ -114,6 +117,29 @@
                 </div>
             </div>
 
+            <div class="pace-table-container">
+                <h3>Recommended Targets</h3>
+                <p class="pace-table-subtitle">Based on your goal time, here are recommended paces for different distances</p>
+                <table class="pace-table">
+                    <thead>
+                        <tr>
+                            <th>Distance</th>
+                            <th>Target Pace</th>
+                            <th>Estimated Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="row in paceTable" :key="row.distance">
+                            <tr>
+                                <td x-text="row.distance"></td>
+                                <td x-text="row.pace"></td>
+                                <td x-text="row.time"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
             <div class="weeks-container">
                 <template x-for="week in plan?.weeks" :key="week.week_number">
                     <div class="week-card">
@@ -137,7 +163,7 @@
         </div>
     </div>
 
-    <script src="static/js/app.js?v=2"></script>
+    <script src="static/js/app.js?v=4"></script>
     <!-- Scroll to Top Button -->
     <button class="scroll-to-top" id="scrollToTop" aria-label="Scroll to top">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

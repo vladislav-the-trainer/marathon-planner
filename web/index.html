@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marathon Training Planner</title>
-    <link rel="stylesheet" href="static/css/styles.css">
+    <link rel="stylesheet" href="static/css/styles.css?v=3">
     <!-- flatpickr date picker -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" crossorigin="anonymous"></script>
@@ -136,5 +136,45 @@
     </div>
 
     <script src="static/js/app.js"></script>
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top" id="scrollToTop" aria-label="Scroll to top">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+        </svg>
+    </button>
+    <script>
+        const scrollToTopBtn = document.getElementById('scrollToTop');
+
+        // Check if plan view is visible (has content)
+        function isPlanVisible() {
+            const planView = document.querySelector('.plan-view');
+            return planView && planView.offsetParent !== null;
+        }
+
+        // Update button visibility based on scroll and plan state
+        function updateScrollButton() {
+            if (!isPlanVisible()) {
+                scrollToTopBtn.classList.remove('visible');
+                return;
+            }
+
+            if (window.scrollY > 300) {
+                scrollToTopBtn.classList.add('visible');
+            } else {
+                scrollToTopBtn.classList.remove('visible');
+            }
+        }
+
+        // Scroll listener
+        window.addEventListener('scroll', updateScrollButton);
+
+        // Also check when Alpine.js updates (poll every 500ms)
+        setInterval(updateScrollButton, 500);
+
+        // Click handler
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
 </body>
 </html>

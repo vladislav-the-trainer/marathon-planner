@@ -151,6 +151,185 @@ function plannerApp() {
             }, 100);
         },
 
+        exportPlan() {
+            // Create export data with all plan information
+            const now = new Date();
+            const exportData = {
+                version: '1.0',
+                exported_at: now.toISOString(),
+                input: {
+                    fitness_level: this.input.fitness_level,
+                    marathon_date: this.input.marathon_date,
+                    target_finish_min: this.input.target_finish_min,
+                    training_days_per_week: this.input.training_days_per_week
+                },
+                plan: this.plan
+            };
+
+            // Create and download JSON file
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            // Format race date for filename
+            const raceDate = this.formatMarathonDate(this.input.marathon_date).replace(/ /g, '-');
+
+            // Format current date and time for filename (YYYY-MM-DD_HH-MM-SS)
+            const exportDate = now.getFullYear() + '-' +
+                String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                String(now.getDate()).padStart(2, '0');
+            const exportTime = String(now.getHours()).padStart(2, '0') + '-' +
+                String(now.getMinutes()).padStart(2, '0') + '-' +
+                String(now.getSeconds()).padStart(2, '0');
+
+            const filename = `Marathon-Plan-${raceDate}_${exportDate}_${exportTime}.json`;
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        },
+
+        triggerImport() {
+            document.getElementById('importFile').click();
+        },
+
+        importPlan(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            if (!file.name.endsWith('.json')) {
+                this.error = 'Please select a valid JSON file (.json)';
+                return;
+            }
+
+            // Validate file size (max 1MB)
+            if (file.size > 1024 * 1024) {
+                this.error = 'File is too large. Maximum size is 1MB.';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+
+                    // Validate imported data structure
+                    const validationResult = this.validateImportedData(data);
+                    if (!validationResult.valid) {
+                        this.error = validationResult.error;
+                        return;
+                    }
+
+                    // Apply imported data
+                    this.input.fitness_level = data.input.fitness_level;
+                    this.input.marathon_date = data.input.marathon_date;
+                    this.input.target_finish_min = data.input.target_finish_min;
+                    this.input.training_days_per_week = data.input.training_days_per_week;
+                    this.plan = data.plan;
+                    this.error = '';
+
+                } catch (err) {
+                    this.error = 'Invalid file format. Please select a valid plan file.';
+                }
+            };
+
+            reader.onerror = () => {
+                this.error = 'Failed to read file. Please try again.';
+            };
+
+            reader.readAsText(file);
+
+            // Reset file input so same file can be imported again
+            event.target.value = '';
+        },
+
+        validateImportedData(data) {
+            // Check required top-level fields
+            if (!data || typeof data !== 'object') {
+                return { valid: false, error: 'Invalid file structure.' };
+            }
+
+            if (!data.input || !data.plan) {
+                return { valid: false, error: 'Missing required plan data.' };
+            }
+
+            // Validate input fields
+            const input = data.input;
+
+            // Validate fitness_level
+            const validLevels = ['beginner', 'intermediate', 'advanced'];
+            if (!validLevels.includes(input.fitness_level)) {
+                return { valid: false, error: 'Invalid fitness level.' };
+            }
+
+            // Validate marathon_date format (YYYY-MM-DD)
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!input.marathon_date || !dateRegex.test(input.marathon_date)) {
+                return { valid: false, error: 'Invalid marathon date format.' };
+            }
+
+            // Validate date is in the future (with small buffer for timezone)
+            const raceDate = new Date(input.marathon_date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (raceDate < today) {
+                return { valid: false, error: 'Marathon date cannot be in the past.' };
+            }
+
+            // Validate target_finish_min (120-480 minutes = 2h to 8h)
+            if (typeof input.target_finish_min !== 'number' ||
+                input.target_finish_min < 120 ||
+                input.target_finish_min > 480) {
+                return { valid: false, error: 'Target time must be between 2h and 8h (120-480 minutes).' };
+            }
+
+            // Validate training_days_per_week (3-6)
+            if (![3, 4, 5, 6].includes(input.training_days_per_week)) {
+                return { valid: false, error: 'Training days must be 3, 4, 5, or 6.' };
+            }
+
+            // Validate plan structure
+            const plan = data.plan;
+            if (!plan.total_weeks || !Array.isArray(plan.weeks)) {
+                return { valid: false, error: 'Invalid plan structure.' };
+            }
+
+            // Validate total_weeks (reasonable range: 1-52 weeks)
+            if (plan.total_weeks < 1 || plan.total_weeks > 52) {
+                return { valid: false, error: 'Invalid total weeks (must be 1-52).' };
+            }
+
+            // Validate weeks array length matches total_weeks
+            if (plan.weeks.length !== plan.total_weeks) {
+                return { valid: false, error: 'Weeks count mismatch.' };
+            }
+
+            // Validate each week structure
+            for (let i = 0; i < plan.weeks.length; i++) {
+                const week = plan.weeks[i];
+                if (!week.week_number || !Array.isArray(week.sessions)) {
+                    return { valid: false, error: `Invalid week ${i + 1} structure.` };
+                }
+
+                // Validate each session
+                for (const session of week.sessions) {
+                    if (typeof session.distance_km !== 'number' || session.distance_km < 0) {
+                        return { valid: false, error: 'Invalid session distance.' };
+                    }
+                    if (session.distance_km > 100) {
+                        return { valid: false, error: 'Unrealistic session distance (max 100km).' };
+                    }
+                }
+            }
+
+            return { valid: true };
+        },
+
         get paceTable() {
             if (!this.input.target_finish_min) return [];
 

@@ -340,9 +340,9 @@ function plannerApp() {
             const distances = [
                 { km: 42.195, label: 'Marathon (42.2 km)' },
                 { km: 21.0975, label: 'Half Marathon (21.1 km)' },
-                { km: 10, label: '10K' },
-                { km: 5, label: '5K' },
-                { km: 1, label: '1K' }
+                { km: 10, label: '10 km' },
+                { km: 5, label: '5 km' },
+                { km: 1, label: '1 km' }
             ];
 
             // Riegel formula: T2 = T1 × (D2/D1)^1.06
@@ -362,7 +362,7 @@ function plannerApp() {
                 const hours = Math.floor(timeMin / 60);
                 const mins = Math.floor(timeMin % 60);
                 const secs = Math.round((timeMin - Math.floor(timeMin)) * 60);
-                let timeStr = '';
+                let timeStr;
                 if (hours > 0) {
                     timeStr = `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
                 } else {
@@ -371,7 +371,7 @@ function plannerApp() {
 
                 return {
                     distance: d.label,
-                    pace: `${paceStr} /km`,
+                    pace: `${paceStr} min/km`,
                     time: timeStr
                 };
             });
